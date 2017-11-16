@@ -1,0 +1,113 @@
+@import url(../../../common/static/reset.css);
+@import url(../../../common/static/common.css);
+@import url(../../../common/static/mediaQuery.css); 
+@import url(../../../common/src/lib/range.css); 
+
+header{
+    position:relative;
+    background:url(../img/bg.png) repeat-x;
+    background-size: contain;
+    text-align:center;
+    padding-bottom:5rem;
+}
+header>figure>img{
+    width:30%;
+    /* filter: drop-shadow(0 -16px 16px rgb(200, 200, 0)); */
+}
+header .switch{
+    position: absolute;
+    right:15px;
+    bottom:15px;
+    display: inline-block;
+    width:3.7rem;
+    height:3.7rem;
+    background:url(../img/switch.png) no-repeat;
+    background-size: cover;
+}
+.fn-wrap>a{
+    text-align:center;
+    line-height:2.6;
+    padding-top:3rem;
+    color:#d8d8d8;
+    font-size:14px;
+    border-right:2px solid #c4c4c4;
+    border-bottom:1px solid #c4c4c4;
+}
+.fn-wrap>a:last-child{
+    border-right:none;
+}
+.fn-wrap>a.active{
+    color:#f8bf75;
+}
+.fn-wrap>.fn-read{
+    background:url(../img/dp_01.png) no-repeat center 5px;
+    background-size:3.5rem 3.5rem;
+}
+.fn-wrap>.fn-read.active{
+    background-image:url(../img/dp_02.png);
+}
+.fn-wrap>.fn-rest{
+    background:url(../img/dp_03.png) no-repeat center 5px;
+    background-size:3.5rem 3.5rem;
+}
+.fn-wrap>.fn-rest.active{
+    background-image:url(../img/dp_04.png);
+}
+.fn-wrap>.fn-light{
+    background:url(../img/dp_05.png) no-repeat center 5px;
+    background-size:3.5rem 3.5rem;
+}
+.fn-wrap>.fn-light.active{
+    background-image:url(../img/dp_06.png);
+}
+h2{
+    line-height:3.6rem;
+    background-color:#eaedf5;
+    font-size:16px;
+    font-weight:bold;
+    padding:0 15px;
+}
+.light-range-wrap{
+    padding:20px 0 10px;
+}
+.light-range-wrap>i{
+    display:inline-block;
+    background:url(../img/ico1.png) no-repeat;
+    background-size:cover;
+    vertical-align:middle;
+}
+.light-range-wrap>i.l-low{
+    margin:10px 10px 0 30px;
+    width:1.5rem;
+    height:1.5rem;
+}
+.light-range-wrap>i.l-high{
+    margin:10px 30px 0 10px;
+    width:2rem;
+    height:2rem;
+}
+/* 调整滑块样式 */
+.light-range-wrap .__range>label>i{
+    background-color:#fff;
+    border-color:#eee;
+    box-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+}
+.light-range-wrap .__range>label>i:before{
+    background-color:rgb(247, 177, 71);
+}
+.color-range-wrap{
+    padding:20px 30px 10px;
+}
+.color-range-wrap .__range>label{
+    padding:1.4rem 0;
+    background:url(../img/color-bar.png) no-repeat 0 center;
+    background-size:100% 50%;
+}
+.color-range-wrap .__range>label>i{
+    background-color:#fff;
+    border-color:#eee;
+    box-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+}
+.color-range-wrap .__range>label>i:before, .color-range-wrap .__range>label>i:after{
+    opacity: 0;
+}
