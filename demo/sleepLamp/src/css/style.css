@@ -8,21 +8,45 @@ header{
     background:url(../img/bg.png) repeat-x;
     background-size: contain;
     text-align:center;
-    padding-bottom:5rem;
+    padding-bottom:2rem;
 }
 header>figure>img{
-    width:30%;
+    width:40%;
     /* filter: drop-shadow(0 -16px 16px rgb(200, 200, 0)); */
 }
+header .tips{
+    position:absolute;
+    top:0;
+    width:100%;
+    background-color: rgba(0, 0, 0, 0.54);
+    line-height: 3;
+    padding: 0 .5rem;
+    text-align: left;
+    font-size: 12px;
+    box-sizing: border-box;
+    color: #d4dff0;
+    overflow: hidden;
+    /* background:rgba(59, 87, 158, 0.54) url(../img/close.png) no-repeat 97% center; */
+    background-size: 1.8rem;
+}
+header .tips>.close{
+    float:right;
+    width:1.5rem;
+    height:1.5rem;
+    margin-top: 0.5rem;
+    background: url(../img/close.png) no-repeat;
+    background-size: cover;
+}
 header .switch{
-    position: absolute;
+    position:absolute;
     right:15px;
     bottom:15px;
-    display: inline-block;
+    display:inline-block;
     width:3.7rem;
     height:3.7rem;
     background:url(../img/switch.png) no-repeat;
-    background-size: cover;
+    background-size:cover;
+    z-index:10000;
 }
 .fn-wrap>a{
     text-align:center;
@@ -77,12 +101,12 @@ h2{
     vertical-align:middle;
 }
 .light-range-wrap>i.l-low{
-    margin:10px 10px 0 30px;
+    margin:9px 10px 0 30px;
     width:1.5rem;
     height:1.5rem;
 }
 .light-range-wrap>i.l-high{
-    margin:10px 30px 0 10px;
+    margin:6px 30px 0 10px;
     width:2rem;
     height:2rem;
 }
@@ -91,6 +115,7 @@ h2{
     background-color:#fff;
     border-color:#eee;
     box-shadow: 1px 1px 1px rgba(0,0,0,0.3);
+    margin-left:-1px;
 }
 .light-range-wrap .__range>label>i:before{
     background-color:rgb(247, 177, 71);
@@ -110,4 +135,60 @@ h2{
 }
 .color-range-wrap .__range>label>i:before, .color-range-wrap .__range>label>i:after{
     opacity: 0;
+}
+.color-range-wrap.off{
+    opacity: 0.4;
+}
+
+.shutdownFace{
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    z-index:9999;
+    background-color:rgba(0,0,0,0.6);
+}
+
+.light_img{position: absolute; left:30%;}
+
+
+
+/* 
+ * 添加toast的样式 
+*/
+
+.toast-cover {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 100
+
+}
+.toast {
+    width: 60%;
+    height: 5rem;
+    position: absolute;
+    left: 20%;
+    top:50%;
+    margin-top:-1rem;
+    background: #fff;
+    color:#000;
+    font-size: 14px;
+    line-height: 5rem;
+    text-align: center;
+    border-radius: 5px;
+}
+
+
+/* 
+ * 覆盖滑块控件的样式
+ *
+*/
+
+.light-range-wrap>i.l-high {
+    margin-left:3px;
 }

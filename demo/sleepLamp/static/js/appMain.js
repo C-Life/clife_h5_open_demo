@@ -80,11 +80,26 @@
 	var hashHistory = _ReactRouter.hashHistory;
 
 
+	var dataTimer = 0;
+
+	// 接收app推送数据
+	het.repaint(function (data) {
+	    // var appData = Funs._extends({}, appData, data);
+	    _Actions.Actions.repaint(data);
+	});
+
 	het.domReady(function () {
 	    // 配置sdk
 	    het.config({
 	        debugMode: 'print', // 打印调试数据
-	        updateFlagMap: {}
+	        updateFlagMap: {
+	            'switchStatus': 1,
+	            'sceneMode': 2,
+	            'wakeMode': 3,
+	            'colorTemp': 4,
+	            'lightness': 5
+	        },
+	        renderConfigData: true
 	    });
 	});
 
@@ -96,20 +111,29 @@
 	    function App(props) {
 	        _classCallCheck(this, App);
 
-	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(App).call(this, props));
+	        var _this2 = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
 	        var isAndroid = !!(navigator.userAgent.indexOf('Android') + 1);
-	        _this.state = {
-	            headerTop: isAndroid ? 73 : 64
+	        _this2.state = {
+	            headerTop: isAndroid ? 73 : 64,
+	            lightness: 0,
+	            colorTemp: 1,
+	            toastShow: false,
+	            switchStatus: ''
 	        };
-	        _this.listenStore(_Store.Store); // 监听Store
-	        return _this;
+	        _this2.listenStore(_Store.Store); // 监听Store
+	        return _this2;
 	    }
 
 	    _createClass(App, [{
 	        key: 'componentDidMount',
 	        value: function componentDidMount() {
-	            _Actions.Actions.getData();
+	            // 灯泡图片缓存处理
+	            setTimeout(function () {
+	                for (var i = 0; i < 14; i++) {
+	                    new Image().src = '../static/img/lights/iv_led_' + i + '.png';
+	                }
+	            }, 500);
 	        }
 	    }, {
 	        key: 'changeSwitch',
@@ -120,36 +144,79 @@
 	        }
 	    }, {
 	        key: 'changeMode',
-	        value: function changeMode(e) {
+	        value: function changeMode(val, e) {
 	            e.preventDefault();
-	            var value = parseInt(e.currentTarget.getAttribute('data-val'));
-	            _Actions.Actions.changeMode(value);
+	            if (!this.isRunning()) return;
+	            _Actions.Actions.changeMode(val);
 	        }
 	    }, {
 	        key: 'changeLight',
 	        value: function changeLight(value) {
+	            if (!this.isRunning()) return;
 	            _Actions.Actions.changeLight(value);
 	        }
 	    }, {
 	        key: 'changeColor',
 	        value: function changeColor(value) {
+	            if (!this.isRunning()) return;
 	            _Actions.Actions.changeColor(value);
+	        }
+	    }, {
+	        key: 'closeTips',
+	        value: function closeTips() {
+	            this.setState({ tipsShow: false });
+	        }
+	    }, {
+	        key: 'getRGBA',
+	        value: function getRGBA(colorTemp, lightness) {
+	            var rgbs = [[0, 0, 0], [255, 0, 0], [255, 255, 0], [0, 255, 0], [0, 200, 0], [0, 180, 0], [0, 255, 255], [0, 180, 255], [0, 140, 220], [0, 60, 230], [100, 0, 220], [255, 0, 255], [200, 0, 200], [100, 160, 255]];
+	            var rgb = rgbs[colorTemp || 0];
+	            lightness = !colorTemp ? 0 : lightness; // 当色温为0时，亮度也为零
+	            return 'rgba(' + rgb + ', ' + (lightness || 0) / 10 + ')';
+	        }
+	    }, {
+	        key: 'isRunning',
+	        value: function isRunning() {
+	            return this.state.switchStatus == 165; // 开关状态（90-关，165-开）
+	        }
+	    }, {
+	        key: 'showToast',
+	        value: function showToast() {
+	            var _this = this;
+	            clearTimeout(window.timer);
+	            if (this.state.sceneMode == 1) {
+	                this.setState({
+	                    toastShow: true
+	                });
+	                window.timer = setTimeout(function () {
+	                    _this.setState({
+	                        toastShow: false
+	                    });
+	                }, 3000);
+	            };
 	        }
 	    }, {
 	        key: 'render',
 	        value: function render() {
-	            var isRunning = this.state.switchStatus == 90 ? false : true; // 开关状态（90-关，165-开）
-	            var cssColor = isRunning ? 'rgba(255, 255, 0, 1)' : 'rgba(255, 255, 255, 0)';
+	            var isRunning = this.isRunning();
+	            var cssColor = isRunning ? this.getRGBA(this.state.colorTemp, this.state.lightness) : 'rgba(255, 255, 255, 0)';
+	            var imgIndex = isRunning ? this.state.lightness == '0' ? 0 : isRunning && this.state.sceneMode == 1 ? 0 : this.state.colorTemp : 0;
 	            return React.createElement(
 	                'div',
 	                null,
 	                React.createElement(
 	                    'header',
-	                    { style: { paddingTop: this.state.headerTop } },
+	                    { style: { paddingTop: this.state.headerTop + 'px' } },
+	                    React.createElement(
+	                        'p',
+	                        { className: 'tips', style: { visibility: this.state.tips && this.state.tipsShow ? 'visible' : 'hidden' }, onTouchStart: this.closeTips.bind(this) },
+	                        this.state.tips
+	                    ),
 	                    React.createElement(
 	                        'figure',
 	                        null,
-	                        React.createElement('img', { src: '../static/img/light.png', style: { filter: 'drop-shadow(0 -16px 16px ' + cssColor + ')' } })
+	                        React.createElement('img', { src: '../static/img/lights/iv_led_' + imgIndex + '.png' }),
+	                        React.createElement('img', { className: 'light_img', style: { opacity: 1 - this.state.lightness / 10 }, src: '../static/img/lights/iv_led_0.png' })
 	                    ),
 	                    React.createElement('a', { href: '#', onTouchStart: this.changeSwitch.bind(this), className: 'switch' })
 	                ),
@@ -158,24 +225,24 @@
 	                    { className: 'flex fn-wrap' },
 	                    React.createElement(
 	                        'a',
-	                        { href: '#', 'data-val': '1', onTouchStart: this.changeMode.bind(this), className: 'flex-cell fn-read ' + (isRunning && this.state.sceneMode == 1 ? 'active' : '') },
-	                        '阅读'
+	                        { href: '#', 'data-val': '1', onTouchStart: this.changeMode.bind(this, 0), className: 'flex-cell fn-read ' + (isRunning && this.state.sceneMode == 1 ? 'active' : '') },
+	                        '\u9605\u8BFB'
 	                    ),
 	                    React.createElement(
 	                        'a',
-	                        { href: '#', 'data-val': '2', onTouchStart: this.changeMode.bind(this), className: 'flex-cell fn-rest ' + (isRunning && this.state.sceneMode == 2 ? 'active' : '') },
-	                        '休息'
+	                        { href: '#', 'data-val': '2', onTouchStart: this.changeMode.bind(this, 1), className: 'flex-cell fn-rest ' + (isRunning && this.state.sceneMode == 2 ? 'active' : '') },
+	                        '\u4F11\u606F'
 	                    ),
 	                    React.createElement(
 	                        'a',
-	                        { href: '#', 'data-val': '3', onTouchStart: this.changeMode.bind(this), className: 'flex-cell fn-light ' + (isRunning && this.state.sceneMode == 3 ? 'active' : '') },
-	                        '夜灯'
+	                        { href: '#', 'data-val': '3', onTouchStart: this.changeMode.bind(this, 2), className: 'flex-cell fn-light ' + (isRunning && this.state.sceneMode == 3 ? 'active' : '') },
+	                        '\u591C\u706F'
 	                    )
 	                ),
 	                React.createElement(
 	                    'h2',
 	                    null,
-	                    '亮度'
+	                    '\u4EAE\u5EA6'
 	                ),
 	                React.createElement(
 	                    'section',
@@ -191,12 +258,22 @@
 	                React.createElement(
 	                    'h2',
 	                    null,
-	                    '颜色'
+	                    '\u989C\u8272'
 	                ),
 	                React.createElement(
 	                    'section',
-	                    { className: 'color-range-wrap' },
-	                    React.createElement(_range2.default, { disabled: !isRunning, value: this.state.colorTemp, max: '13', min: '0', fnFeedback: this.changeColor.bind(this) })
+	                    { className: 'color-range-wrap' + (this.state.sceneMode == 1 ? ' off' : ''), onTouchEnd: this.showToast.bind(this) },
+	                    React.createElement(_range2.default, { disabled: !isRunning || this.state.sceneMode == 1, value: this.state.colorTemp, max: '13', min: '1', fnFeedback: this.changeColor.bind(this) })
+	                ),
+	                React.createElement('div', { className: isRunning ? '' : 'shutdownFace' }),
+	                React.createElement(
+	                    'div',
+	                    { style: { display: this.state.toastShow ? 'block' : 'none' }, className: 'toast-cover' },
+	                    React.createElement(
+	                        'div',
+	                        { className: 'toast' },
+	                        '\u9605\u8BFB\u6A21\u5F0F\u989C\u8272\u4E0D\u80FD\u8C03\u8282\u54E6'
+	                    )
 	                )
 	            );
 	        }
@@ -264,7 +341,7 @@
 	    function BaseComponent(props) {
 	        _classCallCheck(this, BaseComponent);
 
-	        var _this = _possibleConstructorReturn(this, Object.getPrototypeOf(BaseComponent).call(this, props));
+	        var _this = _possibleConstructorReturn(this, (BaseComponent.__proto__ || Object.getPrototypeOf(BaseComponent)).call(this, props));
 
 	        var originComponentDidMount = _this.componentDidMount; // 接管子类方法
 	        var originComponentWillUnmount = _this.componentWillUnmount; // 接管子类方法
@@ -356,7 +433,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	var Actions = exports.Actions = Reflux.createActions(['getData', // 拉取数据
+	var Actions = exports.Actions = Reflux.createActions(['repaint', // 拉取数据
 	'changeSwitch', // 调节模式
 	'changeMode', // 调节模式
 	'changeLight', // 调节亮度
@@ -382,101 +459,104 @@
 
 	var _fun = __webpack_require__(6);
 
-	var deviceId = _fun.Funs.getUrlParam('deviceId');
-	var path = location.host === 'weixin.hetyj.com' ? '/clife-wechat-preRelease/wechat/hotel' : '/clife-wechat-test/wechat/hotel';
-	var source = 8; // 来源
+	// 数据过滤计时器
+	var dataFilterTimers = {
+	    switchStatus: 0,
+	    sceneMode: 0,
+	    lightness: 0,
+	    colorTemp: 0
+	};
+	var lightTimer = 0; // 亮度计时器，防止操作过频繁
+	var colorTimer = 0; // 色温计时器，防止操作过频繁
 
-	var lightTimer = 0; // 亮度计时器
-	var colorTimer = 0; // 色温计时器
+	// 返回过滤后的数据
+	function dataFilter(data) {
+	    var time = new Date().getTime();
+	    var result = {};
+	    for (var k in data) {
+	        if (typeof dataFilterTimers[k] !== 'undefined') {
+	            if (dataFilterTimers[k] < time) {
+	                dataFilterTimers[k] = 0;
+	                result[k] = data[k];
+	            }
+	        } else {
+	            result[k] = data[k];
+	        }
+	    }
+	    return result;
+	}
+
+	// 设置过滤器过期时间
+	function setDataTimer() {
+	    var time = new Date().getTime() + 10e3; // 10秒内不接收新数据
+
+	    for (var _len = arguments.length, keys = Array(_len), _key = 0; _key < _len; _key++) {
+	        keys[_key] = arguments[_key];
+	    }
+
+	    for (var i in keys) {
+	        dataFilterTimers[keys[i]] = time;
+	    }
+	}
 
 	var Store = exports.Store = Reflux.createStore({
 	    listenables: [_Actions.Actions],
-	    onGetData: function onGetData() {
-	        var _this = this;
-	        var timestamp = +new Date();
-	        var url = path + '/device/data/get?deviceId=' + deviceId;
-	        het.get(url, {}, function (data) {
-	            data = JSON.parse(data);
-	            if (data.data) {
-	                _this.trigger(data.data);
+	    onRepaint: function onRepaint(data) {
+	        if (data) {
+	            data.tips = '';
+	            data.tipsShow = false;
+	            if (data.onlineStatus && data.onlineStatus != 0) {
+	                data.tips = '设备不在线';
+	                data.tipsShow = true;
 	            }
-	        });
+	            this.trigger(dataFilter(data));
+	        } else if (data.msg) {
+	            this.trigger({ tips: json.msg, tipsShow: true });
+	        }
 	    },
 	    onChangeSwitch: function onChangeSwitch(value) {
-	        var url = path + '/device/config/set';
-	        var data = {
-	            deviceId: deviceId,
-	            source: source,
-	            json: JSON.stringify({
-	                switchStatus: value,
-	                updateFlag: Math.pow(2, 0)
-	            })
-	        };
+	        setDataTimer('switchStatus');
 	        this.trigger({ switchStatus: value });
-	        het.post(url, data, function (res) {
-	            var d = JSON.parse(res);
-	            if (d.code === 0) {
+	        het.send({ switchStatus: value }, function (res) {
+
+	            if (res.code === 0) {
 	                console.log('调节开关成功');
 	            }
 	        });
 	    },
 	    onChangeMode: function onChangeMode(value) {
-	        var url = path + '/device/config/set';
-	        var data = {
-	            deviceId: deviceId,
-	            source: source,
-	            json: JSON.stringify({
-	                sceneMode: value,
-	                updateFlag: Math.pow(2, 1)
-	            })
-	        };
-	        this.trigger({ sceneMode: value });
-	        het.post(url, data, function (res) {
-	            var d = JSON.parse(res);
-	            if (d.code === 0) {
+	        var modes = [{ colorTemp: 0, lightness: 10, sceneMode: 1 }, { colorTemp: 2, lightness: 8, sceneMode: 2 }, { colorTemp: 1, lightness: 2, sceneMode: 3 }];
+	        setDataTimer('colorTemp', 'lightness', 'sceneMode');
+	        this.trigger(modes[value]);
+	        het.send(modes[value], function (res) {
+	            if (res.code === 0) {
 	                console.log('调节模式成功');
 	            }
 	        });
 	    },
 	    onChangeLight: function onChangeLight(value) {
-	        var url = path + '/device/config/set';
 	        clearTimeout(lightTimer);
 	        lightTimer = setTimeout(function () {
-	            var data = {
-	                deviceId: deviceId,
-	                source: source,
-	                json: JSON.stringify({
-	                    lightness: value,
-	                    updateFlag: Math.pow(2, 4)
-	                })
-	            };
-	            het.post(url, data, function (res) {
-	                var d = JSON.parse(res);
-	                if (d.code === 0) {
+	            het.send({ lightness: value }, function (res) {
+	                if (res.code === 0) {
 	                    console.log('调节亮度成功');
 	                }
 	            });
 	        }, 600);
+	        setDataTimer('lightness');
+	        this.trigger({ lightness: value });
 	    },
 	    onChangeColor: function onChangeColor(value) {
-	        var url = path + '/device/config/set';
 	        clearTimeout(colorTimer);
 	        colorTimer = setTimeout(function () {
-	            var data = {
-	                deviceId: deviceId,
-	                source: source,
-	                json: JSON.stringify({
-	                    colorTemp: value,
-	                    updateFlag: Math.pow(2, 3)
-	                })
-	            };
-	            het.post(url, data, function (res) {
-	                var d = JSON.parse(res);
-	                if (d.code === 0) {
+	            het.send({ colorTemp: value }, function (res) {
+	                if (res.code === 0) {
 	                    console.log('调节色温成功');
 	                }
 	            });
 	        }, 600);
+	        setDataTimer('colorTemp');
+	        this.trigger({ colorTemp: value });
 	    }
 	});
 
@@ -559,13 +639,13 @@
 	            dateObj.setMinutes(dateObj.getMinutes() - timezoneOffset);
 	        }
 	        var map = {
-	            'M': dateObj.getMonth() + 1, //月份
-	            'd': dateObj.getDate(), //日
-	            'h': dateObj.getHours(), //小时
-	            'm': dateObj.getMinutes(), //分
-	            's': dateObj.getSeconds(), //秒
-	            'q': Math.floor((dateObj.getMonth() + 3) / 3), //季度
-	            'S': dateObj.getMilliseconds() //毫秒
+	            'M': dateObj.getMonth() + 1, //月份 
+	            'd': dateObj.getDate(), //日 
+	            'h': dateObj.getHours(), //小时 
+	            'm': dateObj.getMinutes(), //分 
+	            's': dateObj.getSeconds(), //秒 
+	            'q': Math.floor((dateObj.getMonth() + 3) / 3), //季度 
+	            'S': dateObj.getMilliseconds() //毫秒 
 	        };
 	        format = format.replace(/([yMdhmsqS])+/g, function (all, t) {
 	            var v = map[t];
@@ -652,6 +732,26 @@
 	            res = y + '-' + m + '-' + day + " " + h + ':' + mn + ':' + s;
 	        }
 	        return res;
+	    },
+	    // 设置cookies
+	    setCookie: function setCookie(name, value) {
+	        var Days = 30;
+	        var exp = new Date();
+	        exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
+	        document.cookie = name + "=" + escape(value) + ";expires=" + exp.toGMTString() + ";path=/";
+	    },
+	    // 获取cookies
+	    getCookie: function getCookie(name) {
+	        var arr,
+	            reg = new RegExp("(^| )" + name + "=([^;]*)(;|$)");
+	        if (arr = document.cookie.match(reg)) return unescape(arr[2]);else return null;
+	    },
+	    // 删除cookies
+	    delCookie: function delCookie(name) {
+	        var exp = new Date();
+	        exp.setTime(exp.getTime() - 1);
+	        var cval = getCookie(name);
+	        if (cval !== null) document.cookie = name + "=" + cval + ";expires=" + exp.toGMTString() + ";path=/";
 	    }
 	};
 	module.exports = Funs;

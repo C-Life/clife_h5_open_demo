@@ -5,7 +5,7 @@
  */
 
 export const Actions = Reflux.createActions([
-    'getData', // 拉取数据
+    'repaint', // 拉取数据
     'changeSwitch', // 调节模式
     'changeMode', // 调节模式
     'changeLight', // 调节亮度
