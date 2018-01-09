@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="format-detection" content="telephone=no">
+<title>智能设备自助接入系统</title>
+
+<style>
+.container{
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+    text-align: center;
+}
+
+.button{
+	width: 200px;
+	height: 40px;
+	border:1px solid #f00;
+	font-size: 2em;
+	margin: 100px auto;
+}
+</style>
+
+<style>
+	html,body{
+	  font-size:75%;
+	}
+	body::-webkit-scrollbar {
+	    opacity: 0;
+	    width: 0;
+	}
+	input{
+	    outline: none;
+	}
+	*{
+		-webkit-touch-callout:none;
+		-webkit-user-select:none;
+		-khtml-user-select:none;
+		-moz-user-select:none;
+		-ms-user-select:none;
+		user-select:none;
+		-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+	}
+	#pagebody::-webkit-scrollbar-track
+	{
+		display:none;
+		-webkit-box-shadow: inset 0 0 1px rgba(0,0,0,0.3);
+		background-color: #F5F5F5;
+	}
+
+	#pagebody::-webkit-scrollbar
+	{
+		width: 1px;
+		background-color: #F5F5F5;
+	}
+
+	#pagebody::-webkit-scrollbar-thumb
+	{
+		background-color: #FFFFFF;
+	}
+	#pagebody::-webkit-scrollbar-track-piece  
+	{
+		display:none;
+	}
+	@media screen and (max-width: 320px) {
+	    html,body{font-size:62.5%}
+	}
+	@media screen and (min-width: 321px) and (max-width:350px) {
+	    @media screen and (-webkit-min-device-pixel-ratio: 2){
+	        html,body{font-size:71.62%}
+	    }
+	    @media screen and (-webkit-min-device-pixel-ratio: 3){
+	        html,body{font-size:68.75%}
+	    }
+	}
+	@media screen and (min-width: 351px) and (max-width:380px) {
+		@media screen and (-webkit-min-device-pixel-ratio: 2){
+	        html,body{font-size:75%}
+	    }
+	    @media screen and (-webkit-min-device-pixel-ratio: 3){
+	        html,body{font-size:71.98%}
+	    }
+	}
+	@media screen and (min-width: 381px) and (max-width:410px) {
+	    @media screen and (-webkit-min-device-pixel-ratio: 2){
+	        html,body{font-size:79.02%}
+	    }
+	    @media screen and (-webkit-min-device-pixel-ratio: 3){
+	        html,body{font-size:75.84%}
+	    }
+	}
+	@media screen and (min-width: 411px) and (max-width:440px) {
+	    @media screen and (-webkit-min-device-pixel-ratio: 2){
+	        html,body{font-size:86.28%}
+	    }
+	    @media screen and (-webkit-min-device-pixel-ratio: 3){
+	        html,body{font-size:82.8%}
+	    }
+	}
+	@media screen and (min-width: 441px) and (max-width:470px) {
+	    @media screen and (-webkit-min-device-pixel-ratio: 2){
+	        html,body{font-size:97.66%}
+	    }
+	    @media screen and (-webkit-min-device-pixel-ratio: 3){
+	        html,body{font-size:93.75%}
+	    }
+	}
+	@media screen and (min-width: 471px) and (max-width:500px) {
+	    @media screen and (-webkit-min-device-pixel-ratio: 2){
+	        html,body{font-size:104.17%}
+	    }
+	    @media screen and (-webkit-min-device-pixel-ratio: 3){
+	        html,body{font-size:100%}
+	    }
+	}
+	@media screen and (min-width: 501px) and (max-width:539px) {
+	    @media screen and (-webkit-min-device-pixel-ratio: 2){
+	        html,body{font-size:110.68%}
+	    }
+	    @media screen and (-webkit-min-device-pixel-ratio: 3){
+	        html,body{font-size:106.25%}
+	    }
+	}
+	@media screen and (min-width: 540px) {
+	    html,body{font-size: 150%}
+	}
+</style>
+<script src="https://cms.clife.cn/mobile/app-h5/static/js/core/hetsdk.js?v=2.0.1"></script>
+</head>
+<body style="overflow-x:hidden;width:100%;" id="Iframe">
+	<div class="container">
+		
+		<button class="button" onclick="switchOpen()">发送控制命令:关</button>
+		<button class="button" onclick="switchClose()">发送控制命令:开</button>
+	</div>
+</body>
+
+<script type="text/javascript">
+	
+het.domReady(function(){
+	console.log("het.domReady");
+	het.config({
+		// 本地配置信息
+		debugMode:'print',     // 打印调试数据
+		 updateFlagMap: {
+            'switchStatus':1,
+            'sceneMode':2,
+            'wakeMode':3,
+            'colorTemp':4,
+            'lightness':5
+        },
+		renderConfigData : true, // 开启控制数据渲染，以便filter能取到控制数据
+		// 非本地配置信息，会传递给原生APP
+		testConfigData:"testConfigData"
+	});
+});
+
+
+het.repaint(function(data,type){
+	console.log("接收到数据",data);
+	console.log("数据类型", type === 0 ? '控制数据' : '运行数据');
+});
+
+
+function switchOpen()
+{
+	het.send({
+		"switchStatus":"90"
+	},function(data){
+		console.log("success");
+	},function(error){
+		console.log("error");
+	});
+}
+
+function switchClose()
+{
+	het.send({
+		"switchStatus":"165"
+	},function(data){
+		console.log("success");
+	},function(error){
+		console.log("error");
+	});
+}
+
+</script>
+</html>
